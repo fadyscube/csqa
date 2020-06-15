@@ -1,29 +1,32 @@
 {% extends "base.html" %}
 {% block content %}
 
-{% for question in page_obj %}
-    <div class="card mb-3">
-        <div class="card-body">
-            <a href="/question/{{question.id}}">{{ question.title }} <span class="text-secondary num-answers">({{ question.num_answers }} comments)</span></a>
-        </div>
+<div class="card">
+    <div class="card-body">
+        {% for question in page_obj %}
+            <div class="question mb-3">
+                <a href="/question/{{question.id}}">{{ question.title }} <span class="text-secondary num-answers">({{ question.num_answers }} comments)</span></a><br>
+            </div>
+        {% endfor %}
     </div>
-{% endfor %}
-<div class="pagination d-flex justify-content-center">
-            <span class="step-links pagination">
-                {% if page_obj.has_previous %}
-                    <li class="page-item">
-                        <a href="?page={{ page_obj.previous_page_number }}" class="page-link">previous</a>
-                    </li>
-                {% endif %}
+</div>
 
-                <li class="page-item disabled">
-                    <a class="current page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.</a>
-                </li>
-                {% if page_obj.has_next %}
-                    <li class="page-item">
-                        <a href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" class="page-link">next</a>
-                    </li>
-                {% endif %}
-            </span>
-        </div>
+<div class="pagination d-flex justify-content-center">
+    <span class="step-links pagination">
+        {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a href="?page={{ page_obj.previous_page_number }}" class="page-link">previous</a>
+            </li>
+        {% endif %}
+
+        <li class="page-item disabled">
+            <a class="current page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.</a>
+        </li>
+        {% if page_obj.has_next %}
+            <li class="page-item">
+                <a href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" class="page-link">next</a>
+            </li>
+        {% endif %}
+    </span>
+</div>
 {% endblock %}

@@ -1,11 +1,16 @@
 {% extends "base.html" %}
 
 {% block content %}
-{% for question in questions %}
-    <p>
-        <a href="/question/{{question.id}}">{{ question.title }} <span class="text-secondary num-answers">({{ question.num_answers }} comments)</span></a>
-    </p>
-{% endfor %}
+
+<div class="card">
+    <div class="card-body">
+        {% for question in questions %}
+            <div class="question mb-3">
+                <a href="/question/{{question.id}}">{{ question.title }} <span class="text-secondary num-answers">({{ question.num_answers }} comments)</span></a>
+            </div>
+        {% endfor %}
+    </div>
+</div>
 {% if not questions_exist %}
     <p>You haven't asked any questions yet.</p>
 {% endif %}
