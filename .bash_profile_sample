@@ -1,5 +1,0 @@
-# This is a sample file for .bash_profile or .bash_rc
-# on your own computer. Your .bash_profile or .bash_rc
-# is used to define environment variables, which are
-# retrieved through Python commands like os.environ['DATABASE_URL'].
-export DATABASE_URL='postgres://username:password@localhost/databasename'
