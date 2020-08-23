@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div id="app">
+    <div>[[ message ]]</div>
+</div>
+
+{{ username|json_script:"username" }}
+
+<script>
+var username = JSON.parse(document.getElementById('username').textContent);
+var app = new Vue({
+  delimiters: ["[[", "]]"],
+  el: '#app',
+  data: {
+    message: 'Hello ' + username
+  },
+});
+</script>
+{% endblock %}

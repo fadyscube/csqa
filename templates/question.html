@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+
+{% block title %}{{question.title}} | CSQA{% endblock %}
+
+{% block content %}
+<div id="question">
+
+<h5>{{question.title}}</h5>
+<div style="margin-bottom: 5px; font-size: 17px; white-space: break-spaces">{{question.body | urlize }}</div>
+<div class='text-secondary' style="font-size: 14px">
+  posted by {{ question.user }}</span><span class="separator">|</span>{{ question.x_ago }}
+  {% if not asked_by_user %}
+  <span class="separator">|</span>
+  <a href="javascript:void(0)" v-on:click="vote('upvote', upvoted, '/question/{{question.id}}/vote')" :class="[[upvoted ? 'done' : '']]" class="text-secondary">upvote</a>
+  <span class="separator">|</span>
+  <a href="javascript:void(0)" v-on:click="vote('downvote', downvoted, '/question/{{question.id}}/vote')" :class="[[downvoted ? 'done' : '']]" class="text-secondary">downvote</a>
+  {% endif %}
+  <span class="separator">|</span>
+  <span>[[points]] points</span>
+</div>
+
+<answer
+  v-for="answer in answers"
+  v-bind:key="answer.id"
+  v-bind:answer="answer"
+></answer>
+
+<hr class='answer-hr'/>
+{% if current_user.is_authenticated %}
+<form action="/question/{{question.id}}/answer" method="post">
+  {% csrf_token %}
+  <div class="form-group">
+    <textarea class="form-control" id="text" name="text" rows="7" placeholder="Type your answer here." required></textarea>
+  </div>
+  <button type="submit" class="btn btn-primary mb-2">Submit</button>
+</form>
+{% else %}
+<p><a href="/accounts/login">Log in to answer this question</a></p>
+{% endif %}
+
+</div>
+
+{{ points|json_script:"points" }}
+{{ upvoted|json_script:"upvoted" }}
+{{ downvoted|json_script:"downvoted" }}
+{{ answers_serialized|json_script:"answers_serialized" }}
+
+<script>
+var points = JSON.parse(document.getElementById('points').textContent);
+var upvoted = JSON.parse(document.getElementById('upvoted').textContent);
+var downvoted = JSON.parse(document.getElementById('downvoted').textContent);
+var answers = JSON.parse(document.getElementById('answers_serialized').textContent);
+
+function vote(voteType, voted, voteURL) {
+  var bodyFormData = new FormData();
+  if (voted) {
+    bodyFormData.set('vote_type', 'cancel_vote');
+  } else {
+    bodyFormData.set('vote_type', voteType);
+  }
+  axios({
+    method: 'post',
+    url: voteURL,
+    data: bodyFormData,
+    headers: {'Content-Type': 'multipart/form-data' }
+  }).then((response) => {
+    var responseVoteType = response.data.vote_type;
+    var targetObj;
+    if('answer' in this){
+      targetObj = this.answer;
+    } else {
+      targetObj = this;
+    }
+    if (responseVoteType == 'upvote') {
+      targetObj.upvoted = true;
+      targetObj.downvoted = false;
+    } else if (responseVoteType == 'downvote') {
+      targetObj.upvoted = false;
+      targetObj.downvoted = true;
+    } else {
+      targetObj.upvoted = false;
+      targetObj.downvoted = false;
+    }
+    targetObj.points = response.data.points;
+  }).catch((error) => {
+    // 401: Not logged in (not authorized)
+    if(error.message.includes('401')) {
+      window.location.href = "/accounts/signup/";
+    }
+    // We should get here when the request is not
+    // POST or the user's trying to vote on their own question. (400)
+  });
+}
+
+Vue.component('answer', {
+  delimiters: ["[[", "]]"],
+  props: ['answer'],
+  methods: {vote: vote},
+  template: `
+  <div>
+    <hr class='answer-hr'/>
+    <div class='answer-block'>
+      <div class="answer-text" v-html="answer.text_html"></div>
+      <div class='text-secondary answer-sub'>
+        <span>[[ answer.user ]]</span>
+        <span class="separator">|</span>
+        <span>[[ answer.x_ago ]]</span>
+        <span class="separator">|</span>
+        <span v-if="answer.user != '{{current_user.username}}'">
+          <a href="javascript:void(0)" v-on:click="vote('upvote', answer.upvoted, '/answer/' + [[answer.id]] + '/vote')" class="text-secondary" :class="[[answer.upvoted ? 'done' : '']]">upvote</a>
+          <span class="separator">|</span>
+          <a href="javascript:void(0)" v-on:click="vote('downvote', answer.downvoted, '/answer/' + [[answer.id]] + '/vote')" class="text-secondary" :class="[[answer.downvoted ? 'done' : '']]">downvote</a>
+          <span class="separator">|</span>
+        </span>
+        <span>[[answer.points]] points</span>
+      </div>
+    </div>
+  </div>
+  `
+})
+
+var app = new Vue({
+  delimiters: ["[[", "]]"],
+  el: '#question',
+  data: {
+    downvoted: downvoted,
+    upvoted: upvoted,
+    points: points,
+    answers: answers,
+  },
+  methods: {vote: vote}
+});
+</script>
+{% endblock %}
