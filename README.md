@@ -1,4 +1,4 @@
-This is a fork of [ykdojo/csqa](https://github.com/ykdojo/csqa)
+This is a clone of [ykdojo/csqa](https://github.com/ykdojo/csqa)
 
 I have just change the template style.
 
@@ -27,3 +27,6 @@ and after that you can apply the migrations and run the server:
 $ python manage.py migrate
 $ python manage.py runserver
 ```
+
+
+made in algeria
